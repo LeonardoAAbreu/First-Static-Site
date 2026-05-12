@@ -1,5 +1,7 @@
 import re
 
+from blocknode import BlockType, block_to_blocktype
+from htmlnode import ParentNode, text_node_to_html_node
 from textnode import TextNode, TextType
 
 
@@ -125,3 +127,76 @@ def markdown_to_blocks(markdown):
             return_list.append(mk)
 
     return return_list
+
+
+def markdown_to_html_node(markdown):
+    md_block_list = markdown_to_blocks(markdown)
+    md_list = []
+
+    for md_block in md_block_list:
+        block_type = block_to_blocktype(md_block)
+
+        match block_type:
+            case BlockType.PARAGRAPH:
+                md_split = md_block.split("\n")
+                return_string = " ".join(md_split)
+                md_list.append(ParentNode("p", text_to_children(return_string)))
+
+            case BlockType.CODE:
+                return_string = md_block[4:-3]
+                raw = TextNode(return_string, TextType.TEXT)
+                code_html = text_node_to_html_node(raw)
+                md_list.append(ParentNode("pre", [ParentNode("code", [code_html])]))
+
+            case BlockType.QUOTE:
+                list_md_block = md_block.split("\n")
+                stripped = [line[2:] for line in list_md_block]
+                return_string = " ".join(stripped)
+
+                md_list.append(
+                    ParentNode("blockquote", text_to_children(return_string))
+                )
+
+            case BlockType.HEADING:
+                heading_count = 0
+
+                for char in md_block:
+                    if char == "#":
+                        heading_count += 1
+                    else:
+                        break
+
+                md_block = md_block[heading_count + 1 :]
+                md_list.append(
+                    ParentNode(f"h{heading_count}", text_to_children(md_block))
+                )
+
+            case BlockType.ORDERED_LIST:
+                list_md_block = md_block.split("\n")
+                return_list = []
+
+                for element in list_md_block:
+                    element = element[3:]
+                    return_list.append(ParentNode("li", text_to_children(element)))
+                md_list.append(ParentNode("ol", return_list))
+
+            case BlockType.UNORDERED_LIST:
+                list_md_block = md_block.split("\n")
+                return_list = []
+
+                for element in list_md_block:
+                    element = element[2:]
+                    return_list.append(ParentNode("li", text_to_children(element)))
+                md_list.append(ParentNode("ul", return_list))
+
+    return ParentNode("div", md_list)
+
+
+def text_to_children(text):
+    text_list = text_to_textnodes(text)
+    html_list = []
+
+    for lines in text_list:
+        html_list.append(text_node_to_html_node(lines))
+
+    return html_list

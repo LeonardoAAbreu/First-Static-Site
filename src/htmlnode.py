@@ -65,14 +65,14 @@ def text_node_to_html_node(text_node):
 
     match text_node.text_type:
         case TextType.TEXT:
-            return LeafNode(None, "This is a text node")
+            return LeafNode(None, text_node.text)
         case TextType.BOLD:
-            return LeafNode("b", "This is a text node")
+            return LeafNode("b", text_node.text)
         case TextType.ITALIC:
-            return LeafNode("i", "This is a text node")
+            return LeafNode("i", text_node.text)
         case TextType.CODE:
-            return LeafNode("code", "This is a text node")
+            return LeafNode("code", text_node.text)
         case TextType.LINK:
-            return LeafNode("a", "This is a text node", "href")
+            return LeafNode("a", text_node.text, "href")
         case TextType.IMAGE:
             return LeafNode("img", "", "src alt")
