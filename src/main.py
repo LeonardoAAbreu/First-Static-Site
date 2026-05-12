@@ -1,9 +1,63 @@
-from textnode import TextNode
+import os
+import shutil
+
+from inline_markdown import markdown_to_html_node
 
 
 def main():
-    test = TextNode("This is some anchor text", "link", "https://www.boot.dev")
-    print(test)
+    destination = "./public"
+
+    if os.path.exists(destination):
+        shutil.rmtree(destination)
+    os.mkdir(destination)
+
+    copy("./static", destination)
+
+    generate_page("./content/index.md", "./template.html", "./public/index.html")
+
+
+def copy(source, destination):
+    list_dir = os.listdir(source)
+
+    if not os.path.exists(destination):
+        os.mkdir(destination)
+
+    for item in list_dir:
+        src_item = os.path.join(source, item)
+        dest_item = os.path.join(destination, item)
+        # print("copying/creating:", src_item, "->", dest_item)
+
+        if os.path.isfile(src_item):
+            shutil.copy(src_item, dest_item)
+        else:
+            os.mkdir(dest_item)
+            copy(src_item, dest_item)
+
+
+def extract_title(markdown):
+    if markdown[0] == "#":
+        markdown = markdown[1:]
+        markdown = markdown.strip()
+    else:
+        raise Exception("no header")
+    return markdown
+
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+
+    open_from = open(from_path)
+    path = open_from.read()
+    html_string = markdown_to_html_node(path)
+    html_string = html_string.to_html()
+    open_template = open(template_path)
+    template = open_template.read()
+    title_of_page = extract_title(path)
+
+    template = template.replace("{{ Title }}", title_of_page)
+    template = template.replace("{{ Content }}", html_string)
+
+    copy(os.path.join(template_path), os.path.join(dest_path))
 
 
 main()

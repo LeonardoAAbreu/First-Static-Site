@@ -20,7 +20,13 @@ class HTMLNode:
         )
 
     def to_html(self):
-        raise NotImplementedError
+        if not self.value:
+            raise ValueError
+
+        if not self.tag:
+            return f"{self.value}"
+
+        return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
 
     def props_to_html(self):
         if not self.props:
