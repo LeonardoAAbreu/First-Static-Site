@@ -7,6 +7,11 @@ from inline_markdown import markdown_to_html_node
 
 
 def main():
+    if len(sys.argv) > 1:
+        basepath = sys.argv[1]
+    else:
+        basepath = "/"
+
     destination = "./docs"
 
     if os.path.exists(destination):
@@ -15,7 +20,7 @@ def main():
 
     copy("./static", destination)
 
-    generate_pages_recursive("./content", "./template.html", destination)
+    generate_pages_recursive("./content", "./template.html", destination, basepath)
 
 
 def copy(source, destination):
@@ -45,7 +50,7 @@ def extract_title(markdown):
     return markdown
 
 
-def generate_page(from_path, template_path, dest_path):
+"""def generate_page(from_path, template_path, dest_path):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
 
     open_from = open(from_path)
@@ -58,15 +63,14 @@ def generate_page(from_path, template_path, dest_path):
 
     template = template.replace("{{ Title }}", title_of_page)
     template = template.replace("{{ Content }}", html_string)
-    template = template.replace('href="/', f'href="{basepath}')
-    template = template.replace('src="/', f'src="{basepath}')
 
     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
     open_dest = open(dest_path, mode="w")
     open_dest.write(template)
+"""
 
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     open_dir = os.listdir(dir_path_content)
 
     for arch in open_dir:
@@ -82,6 +86,8 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
 
                 template = template.replace("{{ Title }}", title_of_page)
                 template = template.replace("{{ Content }}", html_contents)
+                template = template.replace('href="/', f'href="{basepath}')
+                template = template.replace('src="/', f'src="{basepath}')
 
                 dest_path = Path(os.path.join(dest_dir_path, arch)).with_suffix(".html")
 
@@ -95,14 +101,9 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
                 os.path.join(dir_path_content, arch),
                 template_path,
                 os.path.join(dest_dir_path, arch),
+                basepath,
             )
 
 
 if __name__ == "__main__":
     main()
-
-
-if len(sys.argv) > 1:
-    basepath = sys.argv[1]
-else:
-    basepath = "/"
