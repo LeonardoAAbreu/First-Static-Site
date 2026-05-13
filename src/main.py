@@ -57,7 +57,11 @@ def generate_page(from_path, template_path, dest_path):
     template = template.replace("{{ Title }}", title_of_page)
     template = template.replace("{{ Content }}", html_string)
 
-    copy(os.path.join(template_path), os.path.join(dest_path))
+    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+    open_dest = open(dest_path, mode="w")
+    open_dest.write(template)
+    # copy(os.path.join(template_path), os.path.join(dest_path))
 
 
-main()
+if __name__ == "__main__":
+    main()

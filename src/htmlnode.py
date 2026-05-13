@@ -31,7 +31,8 @@ class HTMLNode:
     def props_to_html(self):
         if not self.props:
             return ""
-        return f"{self.props[0]}{self.props[1]}"
+
+        return " ".join(f' {i}="{j}"' for i, j in self.props.items())
 
 
 class LeafNode(HTMLNode):
@@ -42,7 +43,7 @@ class LeafNode(HTMLNode):
         return f"HTMLNode({self.tag}, {self.value}, {self.props})"
 
     def to_html(self):
-        if not self.value:
+        if self.value is None:
             raise ValueError
 
         if not self.tag:
@@ -79,6 +80,8 @@ def text_node_to_html_node(text_node):
         case TextType.CODE:
             return LeafNode("code", text_node.text)
         case TextType.LINK:
-            return LeafNode("a", text_node.text, "href")
+            this_prop = {"href": text_node.url}
+            return LeafNode("a", text_node.text, this_prop)
         case TextType.IMAGE:
-            return LeafNode("img", "", "src alt")
+            this_prop = {"src": text_node.url, "alt": text_node.text}
+            return LeafNode("img", "", this_prop)

@@ -30,7 +30,7 @@ def block_to_blocktype(text_block):
     if re.search(r"- .*", text_block):
         return BlockType.UNORDERED_LIST
 
-    if re.search(r"\.\d.*", text_block):
+    if re.search(r"\d\..*", text_block):
         return BlockType.ORDERED_LIST
 
     return BlockType.PARAGRAPH
